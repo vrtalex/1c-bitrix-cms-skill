@@ -1,0 +1,91 @@
+name: Validate
+
+# Самодостаточные проверки опубликованного пакета (в публичном репозитории нет tests/).
+# Зависит только от bash + grep + find. Проверяет frontmatter скиллов,
+# синтаксис check-conventions.sh, разрешимость относительных markdown-ссылок
+# и отсутствие внутренних токенов.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: SKILL.md frontmatter (name + description)
+        shell: bash
+        run: |
+          set -eu
+          rc=0
+          for f in skills/*/SKILL.md; do
+            head -1 "$f" | grep -q '^---' || { echo "нет frontmatter: $f"; rc=1; continue; }
+            grep -q '^name:' "$f" || { echo "нет name: $f"; rc=1; }
+            grep -q '^description:' "$f" || { echo "нет description: $f"; rc=1; }
+          done
+          [ "$rc" -eq 0 ] && echo "frontmatter OK"
+          exit $rc
+
+      - name: check-conventions.sh sanity
+        shell: bash
+        run: |
+          set -eu
+          sh -n shared/scripts/check-conventions.sh
+          # Крошечный инлайн-образец: good→exit 0, bad→exit≠0.
+          tmp="$(mktemp -d)"
+          mkdir -p "$tmp/good" "$tmp/bad"
+          printf '%s\n' '<?php' 'echo htmlspecialcharsbx($x);' > "$tmp/good/ok.php"
+          printf '%s\n' '<?$APPLICATION->IncludeComponent();' > "$tmp/bad/short.php"
+          if sh shared/scripts/check-conventions.sh "$tmp/good"; then
+            echo "good-образец → exit 0 ✓"
+          else
+            echo "good-образец неожиданно дал exit≠0" >&2; exit 1
+          fi
+          if sh shared/scripts/check-conventions.sh "$tmp/bad" >/dev/null 2>&1; then
+            echo "bad-образец неожиданно дал exit 0" >&2; exit 1
+          else
+            echo "bad-образец → exit≠0 ✓"
+          fi
+
+      - name: Relative markdown links resolve
+        shell: bash
+        run: |
+          set -eu
+          broken=0
+          # Перебрать md-файлы из skills/ и shared/. Проверяем именно
+          # markdown-ссылки вида ](../...) — без якорей (#...) и пробелов.
+          # (Прозаические упоминания путей вида require(.../footer.php) не трогаем.)
+          for f in $(find skills shared -name '*.md'); do
+            dir="$(dirname "$f")"
+            for link in $(grep -oE '\]\(\.\.[^)# ]*' "$f" 2>/dev/null | sed 's/^](//' | sort -u); do
+              target="$dir/$link"
+              if [ ! -e "$target" ]; then
+                echo "битая относительная ссылка в $f: $link -> $target"
+                broken=1
+              fi
+            done
+          done
+          if [ "$broken" -ne 0 ]; then
+            echo "обнаружены битые относительные ссылки" >&2
+            exit 1
+          fi
+          echo "все относительные markdown-ссылки разрешаются"
+
+      - name: No internal tokens
+        shell: bash
+        run: |
+          set -eu
+          # Шаблон собирается из частей, чтобы сам файл проверки не содержал
+          # искомых литералов и не ложно-срабатывал на себя.
+          d1="res""earch"; d2="spi""ke"; d3="harn""ess"
+          ph="$(printf '%s' 'Ф')""аза"
+          pat="(^|[^A-Za-z0-9_./-])($d1|$d2|$d3)/|docs/super""powers|${ph}[[:space:]]+[0-9]"
+          if grep -rEIl "$pat" skills shared; then
+            echo "обнаружены внутренние токены в опубликованном пакете" >&2
+            exit 1
+          fi
+          echo "внутренних токенов нет"

@@ -1,0 +1,41 @@
+{
+  "source": "https://dev.1c-bitrix.ru/user_help/reqintro.php",
+  "generated": "manual",
+  "core_line": "26.x",
+  "core_verified_build": "26.150.0",
+  "php": {
+    "min": "8.2.0",
+    "min_since": "2026-02-01",
+    "recommended": "8.4+",
+    "source": "https://dev.1c-bitrix.ru/user_help/reqintro.php"
+  },
+  "db": {
+    "mysql_min": "8.0",
+    "charset": "utf8mb4",
+    "mariadb_alt": "10.x/11.x",
+    "utf8_only_since_core": "24.0.0",
+    "source": "https://dev.1c-bitrix.ru/user_help/reqintro.php"
+  },
+  "removed_api": [
+    {
+      "api": "CAll* классы",
+      "removed_in": "main 25.800.0",
+      "source": "https://dev.1c-bitrix.ru/docs/versions.php?lang=ru&module=main"
+    },
+    {
+      "api": "JS core_fx/core_ls",
+      "removed_in": "main 25.900.0",
+      "source": "https://dev.1c-bitrix.ru/docs/versions.php?lang=ru&module=main"
+    },
+    {
+      "api": "QIWI способ оплаты",
+      "removed_in": "sale 24.300.0",
+      "source": "https://dev.1c-bitrix.ru/docs/versions.php?lang=ru&module=sale"
+    },
+    {
+      "api": "WebMoney",
+      "removed_in": "sale/ЮKassa 23.400.0",
+      "source": "https://dev.1c-bitrix.ru/docs/versions.php?lang=ru&module=sale"
+    }
+  ]
+}

@@ -1,0 +1,80 @@
+name: Release
+
+# Публикует релиз ПУБЛИЧНОГО репозитория.
+# При push в main читает ./VERSION, выводит тег vX.Y.Z, пропускает если релиз
+# уже существует, извлекает секцию '## [X.Y.Z]' из ./CHANGELOG.md как заметки
+# и создаёт релиз с тарболом репозитория. Это включает путь install.sh
+# «последний релиз».
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve version and release state
+        id: meta
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="$(tr -d '[:space:]' < VERSION)"
+          TAG="v${VERSION}"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "release_exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "release_exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Extract changelog section
+        if: steps.meta.outputs.release_exists != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="${{ steps.meta.outputs.version }}"
+          awk -v version="$VERSION" '
+            $0 ~ "^## \\[" version "\\]" { capture=1; print; next }
+            capture && $0 ~ "^## \\[" { exit }
+            capture { print }
+          ' CHANGELOG.md > release-notes.md
+          if [ ! -s release-notes.md ]; then
+            echo "Не удалось извлечь заметки для ${VERSION} из CHANGELOG.md" >&2
+            exit 1
+          fi
+
+      - name: Build release tarball
+        if: steps.meta.outputs.release_exists != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG="${{ steps.meta.outputs.tag }}"
+          git archive --format=tar.gz --prefix="1c-bitrix-cms/" -o "1c-bitrix-cms-${TAG}.tar.gz" HEAD
+
+      - name: Create GitHub release
+        if: steps.meta.outputs.release_exists != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG="${{ steps.meta.outputs.tag }}"
+          gh release create "$TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "$TAG" \
+            --notes-file release-notes.md \
+            --target "$GITHUB_SHA" \
+            "1c-bitrix-cms-${TAG}.tar.gz"
