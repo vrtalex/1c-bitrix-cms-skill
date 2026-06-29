@@ -17,7 +17,8 @@
 1. **Корневые CSS подключатся сами.** Файлы `template_styles.css` и `styles.css`
    в корне папки шаблона ядро добавляет автоматически (метод
    `Asset::addTemplateCss()`). Основной CSS шаблона кладём в `template_styles.css`,
-   контентный — в `styles.css`. Вручную `<link>` на них не пишем.
+   контентный — в `styles.css`. Вручную `<link>` на них не пишем. Все
+   зарегистрированные через API head-ассеты выводит `$APPLICATION->ShowHead()`.
 2. **В `<head>` выводим всё одним вызовом.** `<?php $APPLICATION->ShowHead();?>` выводит
    meta-теги, canonical, все CSS, head-строки и head-скрипты. Это обязательный
    вызов; без него подключённые ассеты не попадут на страницу.
@@ -32,6 +33,14 @@
    `template.php` ядро подключает автоматически.
 6. **Объединение/минификация** включается в настройках модуля `main`
    («Оптимизация загрузки CSS/JS») — отдельные файлы собираются в общие бандлы.
+   Чтобы ядро могло собирать и минифицировать ассеты, регистрируйте весь CSS/JS
+   через API (`Asset` / `Extension::load` / `$APPLICATION`), а не литеральными
+   `<link>`/`<script>` в разметке — иначе они в бандл не попадут.
+7. **JS можно увести вниз страницы.** inline-скрипты кладём в зону
+   `AssetLocation::BODY_END` через `addString(...)`, а в `footer.php` перед
+   `</body>` ставим `<?php $APPLICATION->ShowBodyScripts();?>`. Перенос ядерных
+   скриптов в конец `<body>` включается вызовом `CMain::MoveJSToBody()` (или
+   соответствующей настройкой модуля `main`) — это снижает блокировку рендера.
 
 ## Рабочий сниппет (путь в /local)
 
@@ -88,19 +97,27 @@ Extension::load(['ui.buttons', 'ui.tabs']); // станут доступны в 
 ```
 
 ## Выбор API
-Обе версии API поддерживаются; для нового кода предпочтителен D7.
+Сосуществуют два API подключения ассетов, оба поддерживаются. Современный слой —
+синглтон `\Bitrix\Main\Page\Asset::getInstance()` (`addCss()`, `addJs()`,
+`addString()`); это «текущий» способ. Legacy-методы `CMain`/`$APPLICATION`
+(`SetAdditionalCSS()`, `SetTemplateCSS()`, `AddHeadScript()`, `AddHeadString()`)
+не сняты, но фактически проксируют вызовы в тот же `Asset`, поэтому смешивать их
+безопасно. Для нового кода предпочтителен D7-слой.
 
-| Задача | D7 (рекомендуется) | Legacy ($APPLICATION / CJSCore) |
+| Задача | D7 (рекомендуется) | Legacy ($APPLICATION / CMain / CJSCore) |
 |---|---|---|
 | Добавить CSS-файл | `Asset::getInstance()->addCss($path)` | `$APPLICATION->SetAdditionalCSS($path)` |
 | Добавить JS-файл | `Asset::getInstance()->addJs($path)` | `$APPLICATION->AddHeadScript($path)` |
 | Inline в `<head>` | `Asset::getInstance()->addString($html, true, $location)` | `$APPLICATION->AddHeadString($html)` |
 | UI-расширение | `\Bitrix\Main\UI\Extension::load(['ui.buttons'])` | `\CJSCore::Init(['popup', 'ajax'])` |
-| Вывод в шаблоне | `$APPLICATION->ShowHead()` (всё разом) | `ShowCSS()` / `ShowHeadScripts()` / `ShowHeadStrings()` |
+| Вывод head-ассетов | `$APPLICATION->ShowHead()` (всё разом) | `ShowCSS()` / `ShowHeadScripts()` / `ShowHeadStrings()` |
+| Вывод JS внизу `<body>` | `$APPLICATION->ShowBodyScripts()` | `CMain::MoveJSToBody()` (перенос ядерного JS) |
 
 Зоны вставки (`AssetLocation`): `BEFORE_CSS`, `AFTER_CSS`, `AFTER_JS_KERNEL`
-(по умолчанию), `AFTER_JS`. Для composite-режима оборачивай ручные ассеты в
-`startTarget('NAME')` … `stopTarget()`.
+(по умолчанию), `AFTER_JS`, `BODY_END`. Зона `BODY_END` уводит inline-скрипт
+в самый конец `<body>` (его выводит `$APPLICATION->ShowBodyScripts()` в
+`footer.php`) — удобно, чтобы сторонний виджет не блокировал рендер. Для
+composite-режима оборачивай ручные ассеты в `startTarget('NAME')` … `stopTarget()`.
 
 Когда что брать:
 - `Extension::load()` — имя расширения из ≥2 частей (`ui.buttons`, `main.popup`):
@@ -146,3 +163,7 @@ Extension::load(['ui.buttons', 'ui.tabs']); // станут доступны в 
 - [../06-output-on-page.md](../06-output-on-page.md) — вывод заголовка/мета/областей.
 - [../07-customize-component-template.md](../07-customize-component-template.md) —
   ассеты внутри шаблона компонента (`style.css`/`script.js`).
+- API-документация `\Bitrix\Main\Page\Asset`: https://docs.1c-bitrix.ru/api/classes/Bitrix-Main-Page-Asset.html
+- Загрузчик расширений (`Extension::load`): https://docs.1c-bitrix.ru/pages/framework/extensions.html
+- Оптимизация загрузки CSS/JS (объединение, минификация, gzip): https://dev.1c-bitrix.ru/learning/course/index.php?COURSE_ID=35&LESSON_ID=4469
+- Render-blocking ресурсы и их влияние (web.dev): https://web.dev/articles/render-blocking-resources

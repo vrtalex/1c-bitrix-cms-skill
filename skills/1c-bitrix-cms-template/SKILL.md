@@ -1,6 +1,6 @@
 ---
 name: 1c-bitrix-cms-template
-description: Шаблоны сайта на «1С-Битрикс: Управление сайтом» — создание шаблона (header/footer/styles), меню, включаемые области, подключение CSS/JS (Asset, UI-расширения), требования к вёрстке и работе визуального редактора. Используй для оформления/вёрстки сайта Битрикс (не Битрикс24).
+description: Шаблоны сайта на «1С-Битрикс: Управление сайтом» — создание шаблона (header/footer/styles), меню, включаемые области, подключение CSS/JS (Asset, UI-расширения), шаблоны компонентов и переопределение, скорость/современный фронтенд (критический CSS, картинки/шрифты, композит, Core Web Vitals), SEO-метаданные и доступность (canonical/OG/JSON-LD, WCAG), привязка нескольких шаблонов/темы/адаптив, диагностика и Монитор качества, требования к вёрстке и работе визуального редактора. Используй для оформления/вёрстки сайта Битрикс (не Битрикс24).
 ---
 # 1c-bitrix-cms-template
 
@@ -16,6 +16,11 @@ description: Шаблоны сайта на «1С-Битрикс: Управле
 - подключение CSS/JS (Asset, UI-расширения) → `template/04-assets.md`
 - требования к вёрстке (styles.css vs template_styles.css, H1, адаптив, визредактор) → `template/05-verstka-requirements.md`
 - встроить готовую HTML-вёрстку (прототип/макет) в шаблон → `template/06-integrate-prototype.md`
+- шаблоны компонентов / переопределение / result_modifier vs component_epilog → `template/07-component-templates.md`
+- скорость и современный фронтенд (Asset, критический CSS, картинки/шрифты, композит, Core Web Vitals) → `template/08-frontend-performance.md`
+- SEO-метаданные и доступность в шаблоне (title vs H1, canonical/OG/hreflang/JSON-LD, WCAG) → `template/09-seo-meta-a11y.md`
+- привязка нескольких шаблонов / темы / адаптив → `template/10-template-binding.md`
+- диагностика проблем шаблона + Монитор качества → `template/11-troubleshooting-quality.md`
 
 ## База знаний
 Жизненный цикл страницы и шаблона — `../../shared/kb/00-overview.md`; «задача → класс» — `../../shared/kb/api-map.md`. Вывод контента внутри шаблона — под-скилл `1c-bitrix-cms-content`.
