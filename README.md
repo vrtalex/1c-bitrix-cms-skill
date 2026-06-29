@@ -96,6 +96,16 @@ irm https://raw.githubusercontent.com/vrtalex/1c-bitrix-cms-skill/main/install.p
 
 Актуальные системные требования вендора: [dev.1c-bitrix.ru/user_help/reqintro.php](https://dev.1c-bitrix.ru/user_help/reqintro.php).
 
+## Документация вендора
+
+Официальные ресурсы «1С-Битрикс» по разработке — удобно держать под рукой и при работе с агентом давать ссылкой на нужный раздел (например, приложив URL к запросу):
+
+- **Портал разработчика** — [dev.1c-bitrix.ru](https://dev.1c-bitrix.ru/)
+- **Справочник API D7** (современное ядро) — [dev.1c-bitrix.ru/api_d7](https://dev.1c-bitrix.ru/api_d7/)
+- **Справочник классического API** — [dev.1c-bitrix.ru/api_help](https://dev.1c-bitrix.ru/api_help/)
+- **Учебные курсы** (контент-менеджер, администратор, разработчик) — [dev.1c-bitrix.ru/learning](https://dev.1c-bitrix.ru/learning/)
+- **Документация продукта** — [docs.1c-bitrix.ru](https://docs.1c-bitrix.ru/)
+
 ## Лицензия
 
 Source-available по **PolyForm Shield 1.0.0**: можно свободно использовать, изучать и адаптировать навык под свои проекты; нельзя перепродавать его как конкурирующий продукт. Полный текст — [LICENSE](LICENSE).
