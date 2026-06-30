@@ -27,6 +27,7 @@
 2. **Открой страницу** строкой `require($_SERVER["DOCUMENT_ROOT"]."/bitrix/header.php");`
    Это подключает пролог ядра и `header.php` шаблона сайта (asset-таргет `TEMPLATE`,
    затем граница рабочей области `RestartWorkarea()`).
+   > **Если `/bitrix/header.php` / `/bitrix/footer.php` отсутствуют** (неполная установка): это тонкие обёртки — `header.php` = `require_once(.../modules/main/include/prolog.php)`, `footer.php` = `require(.../epilog.php)`. Предпочтительно восстановить эти однострочники. Либо подключить `prolog.php`/`epilog.php` напрямую — полностью эквивалентно: страница идёт **с шаблоном сайта**, `ShowHead`/`ShowPanel`/`ShowTitle` приходят из шаблона. НЕ путать с `prolog_before.php` + `epilog_after.php` — те дают служебную страницу **без шаблона** (AJAX/CLI/standalone-вывод компонента); там `<head>`/мета/админ-панель выводятся вручную.
 3. **Поставь title/мета** через `$APPLICATION` (это единственный путь для title — D7-аналога
    нет). `news.list` при `SET_TITLE=>"Y"` ставит title сам из имени инфоблока.
 4. **Вызови компонент** `$APPLICATION->IncludeComponent("bitrix:news.list", ".default", [...])`

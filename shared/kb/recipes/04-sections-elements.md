@@ -105,6 +105,8 @@ CIBlockElement::SetPropertyValuesEx($elementId, $iblockId, [
 
 ## Проверка
 
+Проверка рендера и структуры — по общему паттерну: [verification](../operations.md) (CLI для структуры, браузер/preview для рендера; на dev-стенде).
+
 **Режим «только файлы» (без живого Битрикс):**
 - Линт PHP: `php -l /local/php_interface/migrations/seed_catalog.php`.
 - Статически убедиться, что в каждом `Add` присутствуют `IBLOCK_ID`, `NAME`, `ACTIVE`, а результат вызова проверяется (`if (!$id) ... LAST_ERROR`).

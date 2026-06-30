@@ -33,12 +33,25 @@ fi
 # (legacy-ядро легально содержит короткие теги и НЕ должно флагаться).
 # grep_proj <ERE> — рекурсивный grep по проекту с исключением каталога ядра /bitrix.
 grep_proj() {
-  grep -rnE --exclude-dir=bitrix "$1" "$DIR" 2>/dev/null
+  # -e "$1": шаблон, начинающийся с '-' (например '->Query'), иначе трактуется
+  # как опция (ugrep/GNU/BSD) и правило молча не срабатывает.
+  grep -rnE --exclude-dir=bitrix -e "$1" "$DIR" 2>/dev/null
 }
 
 # 2) [FAIL] eval(base64(...)) в коде проекта (кроме ядра /bitrix)
 if grep_proj 'eval[[:space:]]*\([[:space:]]*base64' | grep -q .; then
   fail "eval(base64(...)) в коде проекта"
+fi
+
+# 2a) [REVIEW] eval()/assert()/create_function()/динамический вызов на данных запроса —
+#     самый частый PHP-веб-шелл/RCE. НЕ [FAIL] (редкий легитимный eval не должен ломать
+#     exit-код), но требует ручного подтверждения.
+if grep_proj '\b(eval|assert|create_function)[[:space:]]*\([^)]*\$_(REQUEST|POST|GET|COOKIE)' | grep -q .; then
+  review "eval()/assert()/create_function() на данных запроса — вероятный веб-шелл/RCE: не выполнять пользовательский ввод как код"
+fi
+#     динамический вызов функции/метода по данным запроса: $_GET['f'](...) — RCE.
+if grep_proj '\$_(REQUEST|POST|GET|COOKIE)\[[^]]*\][[:space:]]*\(' | grep -q .; then
+  review "динамический вызов \$_GET[..](..) — вероятный веб-шелл/RCE: не вызывать функцию по имени из запроса"
 fi
 
 # 3) [FAIL] короткий открывающий тег <? в коде проекта (нужен <?php).
@@ -53,10 +66,24 @@ if grep_proj '<\?([[:alpha:]$]|[[:space:]])' | grep -vE '<\?php|<\?=|<\?xml' | g
   fail "короткий тег <? в коде проекта (использовать <?php; разрешён только <?=)"
 fi
 
+# Безопасный обход списка файлов из grep -rl. Прежний `for ff in $(grep -rl ...)` делал
+# word-splitting и МОЛЧА ТЕРЯЛ пути с пробелами (например, негейченый установщик с
+# пробелом в имени, правило 9). Пишем список во временный файл и читаем построчно через
+# `IFS= read -r` с редиректом `< "$file"` (а НЕ через пайп): пробелы в путях сохраняются,
+# а тело while выполняется в ТЕКУЩЕЙ оболочке — review() корректно увеличивает счётчик
+# $reviews (важно для STRICT). Замечание: BSD grep на macOS НЕ NUL-разделяет вывод `-lZ`
+# (терминатор — \n), поэтому используем переносы строк, а не NUL; имена с переносом
+# строки (крайне редкий случай) вне области покрытия. Падающий grep (нет совпадений)
+# гасим `|| true`, чтобы не уронить set -eu.
+_ff_tmp="$(mktemp 2>/dev/null || echo "${TMPDIR:-/tmp}/cc_ff.$$")"
+trap 'rm -f "$_ff_tmp"' EXIT INT TERM
+
 # 4) [REVIEW] изменяющие действия без видимого check_bitrix_sessid (семантика — не вердикт)
-for ff in $(grep -rlE --exclude-dir=bitrix '\$_(REQUEST|POST|GET)\[' "$DIR" 2>/dev/null || true); do
+grep -rlE --exclude-dir=bitrix '\$_(REQUEST|POST|GET)\[' "$DIR" 2>/dev/null > "$_ff_tmp" || true
+while IFS= read -r ff; do
+  [ -n "$ff" ] || continue
   grep -q 'bitrix_sessid' "$ff" || review "обработка \$_POST/\$_GET без check_bitrix_sessid: $ff — проверить защиту от CSRF вручную"
-done
+done < "$_ff_tmp"
 
 # 5) [REVIEW] прямой SQL с пользовательским вводом (риск SQL-инъекции)
 if grep_proj '->(Query|Execute|QueryScalar)\([^)]*\$_(REQUEST|POST|GET|COOKIE)' | grep -q .; then
@@ -69,11 +96,12 @@ if grep_proj '(echo|print)[[:space:]]+\$_(REQUEST|POST|GET|COOKIE)\[' | grep -v 
 fi
 
 # 7) [REVIEW] NOT_CHECK_PERMISSIONS — привилегированный установщик в webroot
-if grep -rlE --exclude-dir=bitrix "define\([\"']NOT_CHECK_PERMISSIONS" "$DIR" 2>/dev/null | grep -q .; then
-  for ff in $(grep -rlE --exclude-dir=bitrix "define\([\"']NOT_CHECK_PERMISSIONS" "$DIR" 2>/dev/null); do
-    review "NOT_CHECK_PERMISSIONS в $ff — привилегированный скрипт в webroot: удалить/вынести из корня/закрыть по HTTP после использования"
-  done
-fi
+# Безопасный обход списка файлов: см. комментарий к правилу 4 (читаем через `< "$_ff_tmp"`).
+grep -rlE --exclude-dir=bitrix "define\([\"']NOT_CHECK_PERMISSIONS" "$DIR" 2>/dev/null > "$_ff_tmp" || true
+while IFS= read -r ff; do
+  [ -n "$ff" ] || continue
+  review "NOT_CHECK_PERMISSIONS в $ff — привилегированный скрипт в webroot: удалить/вынести из корня/закрыть по HTTP после использования"
+done < "$_ff_tmp"
 
 # 8) [REVIEW] целостность ядра — только при наличии эталона контрольных сумм
 if [ -f "$DIR/.bitrix-core-checksums" ]; then
@@ -85,19 +113,31 @@ fi
 #    ->Add( | ->Update( | ->Delete()), НО не содержит ни IsAdmin(), ни CLI-гейта
 #    (PHP_SAPI / php_sapi_name 'cli'). Это рецепт-02/03 установщики, мимо которых
 #    проходит правило NOT_CHECK_PERMISSIONS. Каталог ядра /bitrix исключаем.
-for ff in $(grep -rlE --exclude-dir=bitrix 'prolog_before\.php' "$DIR" 2>/dev/null || true); do
+# Безопасный обход списка файлов: см. комментарий к правилу 4. Без этого установщик с
+# пробелом в имени файла молча пропускался (word-splitting в `for ff in $(...)`).
+grep -rlE --exclude-dir=bitrix 'prolog_before\.php' "$DIR" 2>/dev/null > "$_ff_tmp" || true
+while IFS= read -r ff; do
+  [ -n "$ff" ] || continue
   grep -qE 'CIBlock[[:alnum:]_]*::Add|CUserTypeEntity::Add|CAgent::AddAgent|->Add\(|->Update\(|->Delete\(\)' "$ff" || continue
   if grep -qE 'IsAdmin\(|PHP_SAPI|php_sapi_name' "$ff"; then continue; fi
   review "негейченый установщик: $ff подключает prolog_before.php и мутирует данные (Add/Update/Delete) без IsAdmin()/CLI-гейта — закрыть проверкой прав или ограничить запуском из CLI"
-done
+done < "$_ff_tmp"
 
 # 10) [REVIEW] ХАРДКОД-СЕКРЕТЫ: ключ (password|token|api_key|secret|client_secret)
 #     с присваиванием = или : и закавыченным литералом длиной >=6. Очевидные
 #     плейсхолдеры исключаем, чтобы не флагать примеры из рецептов.
 # Между ключом и литералом допускаем кавычки/пробелы/стрелку (`'api_key' => '...'`,
 # `password: "..."`, `token="..."`). Литерал — закавыченная строка длиной >=6.
+# Плейсхолдер-фильтр был построчным: маркер в ХВОСТОВОМ комментарии (`// example`) или
+# любой `<` на строке (в т.ч. от открывающего тега `<?php`) ГЛУШИЛ настоящий секрет.
+# Поэтому: (1) СНАЧАЛА срезаем хвостовой комментарий (`//...`/`#...`) — так маркер из
+# комментария больше не маскирует реальное значение; (2) угловой плейсхолдер сужаем до
+# `<[^?]` (т.е. `<value>`), чтобы открывающий тег `<?php` НЕ считался плейсхолдером.
+# Итог: `'password' => 'realSecret', // example` остаётся секретом; примеры из рецептов
+# (`'token' => 'CHANGE_ME'`, `'api_key' => 'your_token'`, `<PUT_KEY_HERE>`) — отфильтрованы.
 if grep_proj '(password|passwd|secret|token|api[_-]?key|client[_-]?secret)[[:alnum:]_'"'"'"]*[[:space:]]*[=:][>[:space:]]*["'"'"'][^"'"'"']{6,}["'"'"']' \
-   | grep -viE 'CHANGE_ME|\*\*\*|XXX|your_|<|example|описан|placeholder' | grep -q .; then
+   | sed -E 's@[[:space:]]*(//|#).*$@@' \
+   | grep -viE 'CHANGE_ME|\*\*\*|XXX|your_|<[^?]|example|описан|placeholder' | grep -q .; then
   review "похоже на хардкод-секрет (password/token/api_key/... = \"литерал\") — вынести в .settings.php/ENV, не коммитить в репозиторий"
 fi
 
@@ -117,6 +157,25 @@ fi
 #     режим отладки БД в коде.
 if grep_proj '\$DBDebug[[:space:]]*=[[:space:]]*true' | grep -q .; then
   review "\$DBDebug = true — отладка БД раскрывает SQL/структуру: не оставлять в продакшене"
+fi
+
+# 12) [REVIEW] ОСТАВЛЕННЫЕ УСТАНОВОЧНЫЕ/СЛУЖЕБНЫЕ СКРИПТЫ вендора:
+#     bitrixsetup.php, restore.php (в т.ч. с префиксом — example.com.restore.php),
+#     bx_1c_import.php, bitrix_server_test.php, а также карантинный суффикс *.suspected
+#     (от лечащего модуля). Удалять после установки/переноса — Сканер безопасности
+#     вендора флагует их как угрозу.
+#     ВАЖНО (CANON): единственный удаляемый артефакт самого инсталлятора — ФАЙЛ
+#     bitrix/install/index.php, а НЕ весь каталог bitrix/install/. Финализированное
+#     ядро легально сохраняет bitrix/install/ (компоненты, мастера, темы, js,
+#     version.php) — удалять каталог целиком нельзя.
+#     Эвристика, НЕ исчерпывающая: матчинг по именам без учёта регистра. Каталог
+#     bitrix/ намеренно НЕ исключаем — эти скрипты опасны в любом расположении.
+if find "$DIR" \( -iname '*restore.php' -o -iname 'bitrixsetup.php' -o -iname 'bx_1c_import.php' \
+      -o -iname 'bitrix_server_test.php' -o -iname '*.suspected' \) -type f 2>/dev/null | grep -q .; then
+  review "оставленный установочный/служебный скрипт (*restore.php/bitrixsetup.php/bx_1c_import.php/bitrix_server_test.php/*.suspected) — удалить перед сдачей (Сканер безопасности вендора флагует как угрозу; эвристика, не исчерпывающая)"
+fi
+if find "$DIR/bitrix/install" -name "index.php" -type f 2>/dev/null | grep -q .; then
+  review "оставленный установщик (bitrix/install/index.php) — удалить ФАЙЛ перед сдачей (каталог bitrix/install/ остаётся; Сканер безопасности вендора флагует как угрозу)"
 fi
 
 if [ $rc -eq 0 ]; then

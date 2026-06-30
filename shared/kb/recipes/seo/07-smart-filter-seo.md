@@ -100,6 +100,8 @@ Disallow: */filter/clear/apply/
 
 ## Проверка
 
+Проверка рендера и структуры — по общему паттерну: [verification](../../operations.md) (CLI для структуры, браузер/preview для рендера; на dev-стенде).
+
 **Режим «только файлы» (без живого Битрикса):**
 - В параметрах `bitrix:catalog` есть `SEF_MODE=Y` и `SEF_URL_TEMPLATES["smart_filter"]` со `#SMART_FILTER_PATH#`.
 - В `component_epilog.php`: чтение `CHECKED`-значений, ветвление «одно свойство → уникальные мета и индекс / мультивыбор → `noindex`+`canonical`». `php -l` без ошибок.

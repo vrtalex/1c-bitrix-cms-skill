@@ -42,7 +42,7 @@ digraph orchestrator {
 - «чистый старт» — Битрикса нет вовсе → начни с под-скилла **1c-bitrix-cms-setup**.
 - Конфликт сигналов (например, `bitrix/` есть, но БД недоступна) — задай один уточняющий вопрос. Дефолт при отказе — «только файлы».
 
-Для детерминированной картины окружения можно запустить `../../shared/scripts/detect-bitrix.sh [корень_проекта]` — read-only детектор, отдающий JSON (`mode`, `core_present`, `core_version`, `local_present`, `settings_location`, `php_available`, `encoding`, `d7_available`). Это ground-truth для шага «определи среду»; решение всё равно за тобой, детектор лишь снимает угадывание.
+Для детерминированной картины окружения можно запустить `../../shared/scripts/detect-bitrix.sh [корень_проекта]` — read-only детектор, отдающий JSON (`mode`, `core_present`, `core_version`, `local_present`, `settings_location`, `php_available`, `encoding`, `d7_available`, `install_finalized`). Это ground-truth для шага «определи среду»; решение всё равно за тобой, детектор лишь снимает угадывание.
 
 ## 2. Гейты-инварианты (держи всегда)
 - Не изменять ядро (`/bitrix/modules`, `/bitrix/components/bitrix`). Весь свой код — в `/local`.

@@ -59,6 +59,8 @@ echo '<link rel="alternate" hreflang="x-default" href="'
 
 ## Проверка
 
+Проверка рендера и структуры — по общему паттерну: [verification](../../operations.md) (CLI для структуры, браузер/preview для рендера; на dev-стенде).
+
 **Режим «только файлы» (без живого Битрикса):**
 - `hreflang`-теги абсолютные, с self-reference и `x-default`; коды языков валидны (`ru`, `en`, `de-AT`), не выдуманы (нет `hreflang="ru-msk"` под город).
 - Выбран **один** метод (HTML *или* sitemap *или* HTTP), без дублирования.

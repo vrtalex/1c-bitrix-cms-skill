@@ -172,6 +172,8 @@ $image->save(90);
 
 ## Проверка
 
+Проверка рендера и структуры — по общему паттерну: [verification](../operations.md) (CLI для структуры, браузер/preview для рендера; на dev-стенде).
+
 **Режим «только файлы» (без запущенного Битрикса):**
 
 - `php -l` по файлу `/local/php_interface/lib/Media/ImageImporter.php` — синтаксис.

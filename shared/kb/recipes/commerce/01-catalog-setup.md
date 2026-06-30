@@ -177,6 +177,9 @@ Product::add([
 Цену **к показу/покупке** не читайте напрямую из `b_catalog_price` — мимо скидок, НДС, групп пользователя и конвертации валют. В кастомном коде используйте `CCatalogProduct::GetOptimalPrice($id, $qty, $userGroups)`; в шаблонах витрины цены приходят через `CIBlockPriceTools::GetItemPrices`/`GetCatalogPrices`.
 
 ## Проверка
+
+Проверка рендера и структуры — по общему паттерну: [verification](../../operations.md) (CLI для структуры, браузер/preview для рендера; на dev-стенде).
+
 **Режим «только файлы» (без живого Битрикса):**
 - Скрипт лежит в `/local/`, а не в `bitrix/`.
 - В коде есть: `Loader::includeModule('catalog')` (+ `currency`), регистрация каталога (`CCatalog::Add` / `CatalogIblockTable::add`) с проверкой на дубль, получение `GroupTable::getBasePriceType()`, `Product::add` с явным `TYPE` и `MEASURE`, обработка `Result::isSuccess()`.

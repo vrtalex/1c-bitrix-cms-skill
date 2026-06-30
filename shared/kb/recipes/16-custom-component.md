@@ -282,6 +282,8 @@ BX.ajax.runComponentAction('acme:news.feed', 'loadMore', {
 
 ## Проверка
 
+Проверка рендера и структуры — по общему паттерну: [verification](../operations.md) (CLI для структуры, браузер/preview для рендера; на dev-стенде).
+
 Режим «только файлы» (без живого Битрикса):
 
 - Структура есть: `component.php`, `.description.php`, `.parameters.php`, `templates/.default/template.php`, lang-файлы.

@@ -171,6 +171,8 @@ foreach ([['draft', 'Черновик'], ['published', 'Опубликовано
 
 ## Проверка
 
+Проверка рендера и структуры — по общему паттерну: [verification](../operations.md) (CLI для структуры, браузер/preview для рендера; на dev-стенде).
+
 **Режим «только файлы» (без живого Битрикс):**
 
 - статический разбор сниппета: `php -l /local/php_interface/migrations/iblock_add_properties.php`;

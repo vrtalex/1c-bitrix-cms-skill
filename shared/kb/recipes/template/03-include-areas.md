@@ -123,6 +123,8 @@ $APPLICATION->IncludeComponent("bitrix:main.include", "", [
 
 ## Проверка
 
+Проверка рендера и структуры — по общему паттерну: [verification](../../operations.md) (CLI для структуры, браузер/preview для рендера; на dev-стенде).
+
 **Режим «только файлы» (без живого Битрикс):**
 - В шаблоне есть вызов `bitrix:main.include` или `$APPLICATION->IncludeFile(...)`; имя
   компонента — ровно `"bitrix:main.include"`.

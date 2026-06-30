@@ -81,6 +81,8 @@ EventManager::getInstance()->addEventHandler("main", "OnEpilog", function () {
 
 ## Проверка
 
+Проверка рендера и структуры — по общему паттерну: [verification](../../operations.md) (CLI для структуры, браузер/preview для рендера; на dev-стенде).
+
 **Режим «только файлы» (без живого Битрикса):**
 - В шаблоне списка строится `canonical`/`title` через `GetCurPageParam('', ['PAGEN_1'])`; ветка `page == 1` выводит SEO-текст, `page > 1` — нет.
 - Выбранная стратегия согласована: при A — на `page>1` **нет** canonical на 1-ю страницу; при B — есть.

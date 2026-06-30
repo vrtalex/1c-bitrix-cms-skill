@@ -19,6 +19,12 @@
 #   php_available     доступен ли интерпретатор php в PATH
 #   encoding          utf-8 | unknown (эвристика по .settings.php/.encoding)
 #   d7_available      доступно ли ядро D7 (vendor/autoload.php либо bitrix/modules/main/lib)
+#   install_finalized Y | N | unknown — эвристика «установка доведена до конца».
+#                     Требует публичный корневой index.php: завершённый сайт без
+#                     него консервативно даёт N. Ключевой для сканера артефакт —
+#                     bitrix/install/index.php (его наличие → N). Сигнализирует
+#                     только пункты гейта 1 и 4; артефакты публичного слоя
+#                     (пункт 3) не проверяет.
 set -eu
 
 ROOT="${1:-.}"
@@ -84,9 +90,10 @@ if [ -f "$ROOT/bitrix/.encoding" ] \
    && grep -qiE 'utf-?8' "$ROOT/bitrix/.encoding" 2>/dev/null; then
   encoding="utf-8"
 elif [ -f "$ROOT/bitrix/.settings.php" ] \
-   && grep -iE 'utf_mode' "$ROOT/bitrix/.settings.php" 2>/dev/null \
-      | grep -qiE 'true|utf-?8'; then
-  # 'utf_mode' => array('value' => true, ...) на одной строке — типичный случай.
+   && grep -A2 'utf_mode' "$ROOT/bitrix/.settings.php" 2>/dev/null \
+      | grep -qiE "'value'[[:space:]]*=>[[:space:]]*true"; then
+  # 'utf_mode' => array('value' => true, ...). Битрикс печатает этот массив
+  # многострочно, поэтому захватываем 2 строки после ключа (grep -A2).
   encoding="utf-8"
 fi
 
@@ -112,6 +119,51 @@ else
   mode="clean"
 fi
 
+# --- сигнал install_finalized ---------------------------------------------
+# Эвристика «установка доведена до конца»: Y / N / unknown.
+# unknown — если нет никаких признаков Битрикса в корне (нечего анализировать).
+# Это эвристика; ПОЛНЫЙ «гейт завершённости» дополнительно проверяет, что
+# визуальный редактор открывается — этого shell не умеет,
+# см. recipes/setup/03-installation.
+install_finalized="unknown"
+if [ "$core_present" = "1" ] || [ -f "$ROOT/index.php" ]; then
+  # Условия для Y (все должны выполняться):
+  # 1) корневой index.php есть и не содержит маркеров мастера установки
+  #    (нет публичного index.php — консервативно N, а не Y).
+  # 2) присутствует bitrix/admin/index.php
+  # 3) нет установочных скриптов в корне и нет bitrix/install/index.php
+  # Это сигнал по пунктам гейта 1 и 4; артефакты публичного слоя
+  # (пункт 3 гейта) здесь НЕ инспектируются.
+  _idx="$ROOT/index.php"
+  _idx_ok=0
+  if [ -f "$_idx" ]; then
+    if ! grep -qiE 'bitrixsetup|BX_BITRIX_INSTALL|CurrentStepID|wizard' "$_idx" 2>/dev/null; then
+      _idx_ok=1
+    fi
+  fi
+
+  _admin_ok=0
+  [ -f "$ROOT/bitrix/admin/index.php" ] && _admin_ok=1
+
+  # restore.php ловим по СУФФИКСУ: распространён префиксный вариант
+  # example.com.restore.php (публичный эндпоинт перезаписи сайта); шаблон
+  # *[Rr]estore.php покрывает и .Restore.php. Карантинный суффикс *.suspected
+  # (модуль «Лечение сайта») — тоже артефакт. Остальные — по точному имени.
+  # [ -e ] нужен, т.к. под set -eu несовпавший glob /bin/sh раскрывается в сам
+  # шаблон, и [ -f ] на нём дал бы ложный матч.
+  _setup_absent=1
+  for _s in "$ROOT"/*[Rr]estore.php "$ROOT"/*.suspected "$ROOT"/bitrixsetup.php "$ROOT"/bx_1c_import.php "$ROOT"/bitrix_server_test.php; do
+    [ -e "$_s" ] && { _setup_absent=0; break; }
+  done
+  [ -f "$ROOT/bitrix/install/index.php" ] && _setup_absent=0
+
+  if [ "$_idx_ok" = "1" ] && [ "$_admin_ok" = "1" ] && [ "$_setup_absent" = "1" ]; then
+    install_finalized="Y"
+  else
+    install_finalized="N"
+  fi
+fi
+
 # --- вывод JSON -----------------------------------------------------------
 
 printf '{'
@@ -123,5 +175,6 @@ printf '"settings_location": "%s", ' "$(json_escape "$settings_location")"
 printf '"db_reachable": "unknown", '
 printf '"php_available": %s, ' "$(emit_bool "$php_available")"
 printf '"encoding": "%s", ' "$(json_escape "$encoding")"
-printf '"d7_available": %s' "$(emit_bool "$d7_available")"
+printf '"d7_available": %s, ' "$(emit_bool "$d7_available")"
+printf '"install_finalized": "%s"' "$(json_escape "$install_finalized")"
 printf '}\n'

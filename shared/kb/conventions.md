@@ -91,6 +91,13 @@
 - Разделять логику и представление: бизнес-логику в `component.php`/`class.php` (`executeComponent()`), HTML — только в `template.php`; валидацию параметров — в `onPrepareComponentParams()`. [src](https://dev.1c-bitrix.ru/learning/course/index.php?COURSE_ID=43&LESSON_ID=2028)
 - Вместо `echo`/`var_dump`/`print_r` использовать штатные логгеры ядра на PSR-3 (`\Psr\Log\LoggerInterface`, с main 21.900.0); получать через `Diag\Logger::create`, настраивать в `.settings.php`. [src](https://dev.1c-bitrix.ru/learning/course/index.php?COURSE_ID=43&LESSON_ID=15330)
 - Для автоформатирования по стандарту Битрикс использовать `php_beautifier` с профилем `Lowercase Bitrix` — _стиль форматирования собственный (не PSR-12)_. [src](https://dev.1c-bitrix.ru/learning/course/index.php?COURSE_ID=43&LESSON_ID=5759)
+- **CLI-bootstrap (запуск сниппетов вне веб-запроса).** При запуске PHP-скрипта из CLI или агента, до строки `require .../bitrix/modules/main/include/prolog_before.php`, задать `$_SERVER['DOCUMENT_ROOT']` (абсолютный путь до корня сайта) и при необходимости `$_SERVER['SERVER_NAME']` — иначе ядро не резолвит конфигурацию и файлы модулей. Типичный заголовок установочного скрипта:
+  ```php
+  <?php
+  $_SERVER['DOCUMENT_ROOT'] = '/var/www/html';  // путь до корня, без слэша на конце
+  $_SERVER['SERVER_NAME']   = 'site.ru';
+  require $_SERVER['DOCUMENT_ROOT'] . '/bitrix/modules/main/include/prolog_before.php';
+  ```
 
 ---
 

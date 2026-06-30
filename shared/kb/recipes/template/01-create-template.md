@@ -136,6 +136,9 @@ $TEMPLATE["standard.php"] = array("name" => "Обычная страница", "
 - Редактируемые из публички области (логотип, телефон, копирайт): `bitrix:main.include` с `AREA_FILE_SHOW="file"` (поддерживает режимы `file`/`sect`/`page`, кэш и правку из публичной части).
 
 ## Проверка
+
+Проверка рендера и структуры — по общему паттерну: [verification](../../operations.md) (CLI для структуры, браузер/preview для рендера; на dev-стенде).
+
 Режим «только файлы» (без запущенного Битрикса):
 - В `/local/templates/<id>/` присутствуют `header.php`, `footer.php`, `description.php`, `styles.css`, `template_styles.css`, `.styles.php`.
 - В начале `header.php`, `footer.php`, `description.php`, `.styles.php` есть guard `if (!defined("B_PROLOG_INCLUDED")...) die();`.

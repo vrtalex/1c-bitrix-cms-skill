@@ -183,6 +183,8 @@ define('MAIN_MOVE_JS_TO_BODY', true);
 
 ## Проверка
 
+Проверка рендера и структуры — по общему паттерну: [verification](../../operations.md) (CLI для структуры, браузер/preview для рендера; на dev-стенде).
+
 Режим «только файлы» (без запущенного Битрикс):
 - В конце `footer.php` есть ровно один `$APPLICATION->ShowBodyScripts()`.
 - У LCP-картинки нет `loading="lazy"`, но есть `width`/`height` и

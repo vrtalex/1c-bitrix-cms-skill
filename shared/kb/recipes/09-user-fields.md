@@ -119,6 +119,8 @@ $rows = $dataClass::getList(['select' => ['UF_NAME', 'UF_FILE']])->fetchAll();
 
 ## Проверка
 
+Проверка рендера и структуры — по общему паттерну: [verification](../operations.md) (CLI для структуры, браузер/preview для рендера; на dev-стенде).
+
 **Режим «только файлы»** (без живого Битрикса):
 
 ```bash

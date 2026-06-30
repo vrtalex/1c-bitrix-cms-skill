@@ -95,6 +95,9 @@ $aMenuLinks = array_merge($aMenuLinks, $aMenuLinksExt);
 ```
 
 ## Проверка
+
+Проверка рендера и структуры — по общему паттерну: [verification](../../operations.md) (CLI для структуры, браузер/preview для рендера; на dev-стенде).
+
 **Режим «только файлы» (без запущенного Битрикса):**
 - `php -l` на каждом `.menu.php` / `.menu_ext.php` / `header.php` — синтаксис без ошибок.
 - В каждом пункте `$aMenuLinks` ровно 5 элементов в правильном порядке (`TEXT, LINK, ADD_LINKS[], PARAMS[], CONDITION`); `[2]` и `[3]` — массивы, `[4]` — строка.

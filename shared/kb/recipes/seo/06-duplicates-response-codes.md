@@ -83,6 +83,8 @@ header('X-Robots-Tag: noindex, follow', true);
 
 ## Проверка
 
+Проверка рендера и структуры — по общему паттерну: [verification](../../operations.md) (CLI для структуры, браузер/preview для рендера; на dev-стенде).
+
 **Режим «только файлы» (без живого Битрикса):**
 - В `/404.php` первыми идут `urlrewrite.php`-include, `CHTTP::SetStatus("404 Not Found")`, `@define("ERROR_404","Y")` — до `bitrix/header.php`. `php -l /404.php` без ошибок.
 - В `robots.txt` строки `Clean-param:` синтаксически валидны (≤ 500 символов на директиву; параметры через `&`; путь — необязательный второй аргумент).

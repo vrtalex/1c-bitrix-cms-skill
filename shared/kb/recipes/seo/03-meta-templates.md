@@ -103,6 +103,8 @@ $APPLICATION->SetPageProperty('og:title', $values['ELEMENT_META_TITLE']);
 
 ## Проверка
 
+Проверка рендера и структуры — по общему паттерну: [verification](../../operations.md) (CLI для структуры, браузер/preview для рендера; на dev-стенде).
+
 **Режим «только файлы» (без живого Битрикса):**
 - Установочный скрипт использует классы из `Bitrix\Iblock\InheritedProperty\*`, коды шаблонов — из предопределённого набора (`ELEMENT_META_*`, `ELEMENT_PAGE_TITLE`, `SECTION_META_*`, `*_PICTURE_FILE_ALT/TITLE`).
 - Плейсхолдеры в шаблонах имеют корректный синтаксис `{= ... }` с областью (`this.` / `property.` / `parent.`); у свойства указан суффикс `.Value`.

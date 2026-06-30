@@ -168,6 +168,8 @@ $elementParam = new Param([
 
 ## Проверка
 
+Проверка рендера и структуры — по общему паттерну: [verification](../operations.md) (CLI для структуры, браузер/preview для рендера; на dev-стенде).
+
 **Режим «только файлы» (без запущенного Битрикс):**
 
 - PHP-синтаксис скрипта: `php -l /local/php_interface/lists_setup.php`.

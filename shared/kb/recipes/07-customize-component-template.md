@@ -102,6 +102,8 @@ $component->setResultCacheKeys(["NAME", "SECTION", "ITEMS"]);
 
 ## Проверка
 
+Проверка рендера и структуры — по общему паттерну: [verification](../operations.md) (CLI для структуры, браузер/preview для рендера; на dev-стенде).
+
 Режим «только файлы» (без запущенного Битрикса):
 - Каталог соответствует схеме `/local/templates/<SITE_TEMPLATE_ID>/components/bitrix/<имя_компонента>/<имя_шаблона>/`.
 - В каталоге есть `template.php` со стражем `B_PROLOG_INCLUDED`.

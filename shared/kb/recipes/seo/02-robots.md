@@ -104,6 +104,8 @@ $sitemaps = $robots->getRules(RobotsFile::SITEMAP_RULE);
 
 ## Выбор API
 
+> **Предпосылка: модуль `seo` должен быть установлен.** `\Bitrix\Seo\RobotsFile` доступен только при `Loader::includeModule('seo') === true`. Если модуль не установлен, записывайте `robots.txt` статически: сформируйте строки `User-agent: *`, нужные `Disallow:`, `Clean-param:` и `Sitemap:` и запишите файл через `\Bitrix\Main\IO\File` (или стандартным `file_put_contents`) в корень сайта (`$_SERVER['DOCUMENT_ROOT'] . '/robots.txt'`). Служебные `Disallow` (`/bitrix/`, `/*?`) и строка `Sitemap:` остаются обязательными независимо от способа записи.
+
 - `\Bitrix\Seo\RobotsFile` (D7) — единственный поддерживаемый программный интерфейс для robots.txt
   в ядре 26.x. Используйте его и в коде, и понимая, что админ-страница `seo_robots.php` работает
   через этот же класс.
@@ -125,6 +127,8 @@ $sitemaps = $robots->getRules(RobotsFile::SITEMAP_RULE);
   в рецепте [SEO-06](./06-duplicates-response-codes.md).
 
 ## Проверка
+
+Проверка рендера и структуры — по общему паттерну: [verification](../../operations.md) (CLI для структуры, браузер/preview для рендера; на dev-стенде).
 
 **Режим «только файлы» (без запущенного Битрикс):**
 - Запись `RobotsFile` появилась в корне сайта: `test -f <DOCUMENT_ROOT>/robots.txt`.

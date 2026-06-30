@@ -174,6 +174,8 @@ foreach ($collection as $element) {
 
 ## Проверка
 
+Проверка рендера и структуры — по общему паттерну: [verification](../operations.md) (CLI для структуры, браузер/preview для рендера; на dev-стенде).
+
 Режим «только файлы» (без запущенного Битрикса):
 - PHP-синтаксис: `php -l /local/php_interface/lib/Content/NewsRepository.php`.
 - Глазами: в `$filter` присутствует `IBLOCK_ID`; в `$select` нет `*` и перечислены реальные поля;

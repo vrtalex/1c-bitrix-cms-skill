@@ -183,6 +183,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && check_bitrix_sessid()) {
 
 ## Проверка
 
+Проверка рендера и структуры — по общему паттерну: [verification](../../operations.md) (CLI для структуры, браузер/preview для рендера; на dev-стенде).
+
 Режим «только файлы» (без запущенного Битрикс):
 - В шаблоне ровно один `<h1>` и он выводится `ShowTitle(false)`, а не захардкожен.
 - `<title>` — `ShowTitle()` (со свойством); description через `SetPageProperty`.
