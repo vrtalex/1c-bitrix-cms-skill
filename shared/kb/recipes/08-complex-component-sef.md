@@ -139,6 +139,8 @@ $APPLICATION->IncludeComponent("bitrix:news.list", "", [
 
 ## Проверка
 
+Проверка рендера и структуры — по общему паттерну: [verification](../operations.md) (CLI для структуры, браузер/preview для рендера; на dev-стенде).
+
 **Режим «только файлы» (без живого Битрикса):**
 - В вызове присутствуют `SEF_MODE => "Y"`, `SEF_FOLDER` и все ключи `SEF_URL_TEMPLATES`
   (`news`, `section`, `detail` минимум; `search`/`rss` при `USE_SEARCH`/`USE_RSS`).

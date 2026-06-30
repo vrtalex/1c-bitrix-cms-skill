@@ -169,4 +169,3 @@ $TEMPLATE["standard.php"] = array("name" => "Обычная страница", "
 - Шаблоны сайта (структура, `#WORK_AREA#`, styles.css/template_styles.css): https://dev.1c-bitrix.ru/api_help/main/general/template.php
 - Конвейер вывода страницы (prolog/epilog): https://training.bitrix24.com/support/training/course/?COURSE_ID=68&LESSON_ID=5950
 - Формат `.styles.php` (ключи `tag`/`title`/`html`/`section`): https://dev.1c-bitrix.ru/learning/course/index.php?COURSE_ID=43&LESSON_ID=3437
-- Официальная документация для разработчиков: https://dev.1c-bitrix.ru/

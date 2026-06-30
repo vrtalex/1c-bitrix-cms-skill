@@ -148,6 +148,9 @@ if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) die();
 ```
 
 ## Проверка
+
+Проверка рендера и структуры — по общему паттерну: [verification](../../operations.md) (CLI для структуры, браузер/preview для рендера; на dev-стенде).
+
 Режим «только файлы» (без запущенного Битрикс):
 - В `header.php` есть `ShowHead()`, `ShowTitle()` и `ShowPanel()` сразу после
   `<body>`; `<!DOCTYPE html>` и `lang` на `<html>`.

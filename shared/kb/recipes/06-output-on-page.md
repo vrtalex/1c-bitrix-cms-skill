@@ -143,6 +143,8 @@ $APPLICATION->IncludeComponent("bitrix:news.detail", ".default", [
 
 ## Проверка
 
+Проверка рендера и структуры — по общему паттерну: [verification](../operations.md) (CLI для структуры, браузер/preview для рендера; на dev-стенде).
+
 **Режим «только файлы» (без живого Битрикс):**
 - Страница лежит в document root, путь = ожидаемому URL; не в `/bitrix` и не в `/local`.
 - Файл открывается `require(... "/bitrix/header.php")` и закрывается `require(... "/bitrix/footer.php")` — пара на месте.
@@ -184,4 +186,5 @@ $APPLICATION->IncludeComponent("bitrix:news.detail", ".default", [
   `component_epilog.php`.
 - `../api-map.md` — карта компонентов вывода (`news.*`, `catalog.*`, `menu`,
   `breadcrumb`) и их ключевых `arParams`.
-- Официальная документация разработчика: https://dev.1c-bitrix.ru/
+- `../components/00-index.md` — каталог карточек ходовых компонентов (параметры,
+  кастомизация шаблона); карточку `bitrix:news.list` — в `../components/01-news.md`.

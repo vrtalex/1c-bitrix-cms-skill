@@ -212,4 +212,3 @@ Product::add([
 - `../03-add-properties.md` — свойства, включая свойство «привязка к элементу» (тип E) для связки offer → товар.
 - `../../00-overview.md` — карта под-скиллов и модулей платформы.
 - `../../api-map.md` — модель iblock/catalog, две версии API, права, провайдер для `sale`.
-- Документация вендора: https://dev.1c-bitrix.ru/ , https://docs.1c-bitrix.ru/

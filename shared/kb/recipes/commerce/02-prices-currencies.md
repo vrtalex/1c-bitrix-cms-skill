@@ -201,5 +201,4 @@ Price::recountPricesFromBase($elementId);
 - [Добавление свойств](../03-add-properties.md) — характеристики товара/предложений.
 - [Обзор базы знаний](../../00-overview.md) — модули и их зависимости (`catalog` → `iblock` + `currency` + `sale`).
 - [Карта API](../../api-map.md) — две поддерживаемые версии API, Model-слой и legacy-фасады.
-- Документация вендора: https://dev.1c-bitrix.ru/ , https://docs.1c-bitrix.ru/
 ```

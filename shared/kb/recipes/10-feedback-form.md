@@ -272,6 +272,8 @@ CEvent::Send("FORM_FILLING_FEEDBACK", SITE_ID, [
 
 ## Проверка
 
+Проверка рендера и структуры — по общему паттерну: [verification](../operations.md) (CLI для структуры, браузер/preview для рендера; на dev-стенде).
+
 **Режим «только файлы» (без живого Битрикс):**
 - Страница с формой лежит в document root (путь = URL), открыта/закрыта парой
   `require(... "/bitrix/header.php")` / `... "/bitrix/footer.php")`.
@@ -336,4 +338,3 @@ CEvent::Send("FORM_FILLING_FEEDBACK", SITE_ID, [
   `result_modifier.php`, `component_epilog.php`.
 - `kb/api-map` — строки про веб-форму и транзакционное письмо (`CForm*`, `CEvent`).
 - `kb/glossary` — термины «Веб-форма (form)», «Почтовое событие».
-- Официальная документация разработчика: https://dev.1c-bitrix.ru/

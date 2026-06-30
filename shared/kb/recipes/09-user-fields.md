@@ -159,5 +159,4 @@ mysql -e "SHOW COLUMNS FROM b_uts_iblock_5_section LIKE 'UF_SECTION_BANNER';" bi
 ## Связано
 
 - `04-sections-elements.md` — инфоблоки, разделы и свойства элементов (`CIBlockProperty`).
-- `../api-map.md` — HL-блоки, где UF являются основными полями структуры.
-- `../api-map.md` — заказы магазина и доступ к `UF_*` через ORM `\Bitrix\Sale\Order`.
+- `../api-map.md` — HL-блоки (UF — основные поля структуры); заказы магазина и доступ к `UF_*` через ORM `\Bitrix\Sale\Order`.

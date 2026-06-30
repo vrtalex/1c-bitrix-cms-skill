@@ -127,4 +127,3 @@ $component->setResultCacheKeys(["NAME", "SECTION", "ITEMS"]);
 - Рецепт `06-place-component-on-page` — вставка компонента и его параметры (`.parameters.php`).
 - Рецепт `11-site-template-structure` — структура шаблона сайта, `header.php`/`footer.php`, приоритет `/local`.
 - KB: `../00-overview.md` (жизненный цикл, кэш, хуки шаблона), `../api-map.md` (резолв шаблона компонента, `SITE_TEMPLATE_ID`).
-- Официальная документация по компонентам и шаблонам: https://dev.1c-bitrix.ru/

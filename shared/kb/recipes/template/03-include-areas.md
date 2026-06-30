@@ -162,4 +162,3 @@ $APPLICATION->IncludeComponent("bitrix:main.include", "", [
 - `../06-output-on-page.md` — вывод списков/контента компонентами (когда нужна не область).
 - `../07-customize-component-template.md` — кастом шаблона компонента (`template.php`,
   `result_modifier.php`).
-- Официальная документация разработчика: https://dev.1c-bitrix.ru/

@@ -37,5 +37,22 @@
       "removed_in": "sale/ЮKassa 23.400.0",
       "source": "https://dev.1c-bitrix.ru/docs/versions.php?lang=ru&module=sale"
     }
+  ],
+  "discouraged_api": [
+    {
+      "api": "mysql_real_escape_string",
+      "reason": "Прямой вызов mysql_*/mysqli_* в коде Битрикса; используйте ORM или Application::getConnection()->getSqlHelper()->forSql()",
+      "source": "https://dev.1c-bitrix.ru/api_d7/bitrix/main/db/connection/getsqlhelper.php"
+    },
+    {
+      "api": "RegisterModuleDependences",
+      "reason": "Устаревшая регистрация постоянных обработчиков событий; используйте EventManager::registerEventHandler() (D7)",
+      "source": "https://dev.1c-bitrix.ru/api_d7/bitrix/main/eventmanager/registereventhandler.php"
+    },
+    {
+      "api": "DBSimple",
+      "reason": "Устаревший ORM-слой ядра; используйте Bitrix\\Main\\ORM или Application::getConnection()",
+      "source": "https://dev.1c-bitrix.ru/api_d7/bitrix/main/db/"
+    }
   ]
 }
